@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, Loader2, ShieldCheck, CheckCircle } from "lucide-react";
+import { Mail, ArrowRight, Loader2, ShieldCheck, CheckCircle, MailOpen } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -21,11 +21,18 @@ export default function LoginPage() {
 
     try {
       const supabase = createSupabaseBrowserClient();
+
+      // Determine correct redirect URL
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback`
+          : `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectTo,
         },
       });
 
@@ -72,19 +79,21 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-zinc-950 border border-zinc-800 p-8">
+
           {!sent ? (
             <>
               <h1 className="text-xl font-black tracking-widest uppercase text-white mb-1">
                 Login / Register
               </h1>
-              <p className="text-zinc-500 text-sm mb-8">
-                Enter your email — we&apos;ll send you a secure login link.
-                <br />
-                <span className="text-zinc-600 text-xs">New user? Account will be created automatically.</span>
+              <p className="text-zinc-500 text-sm mb-2">
+                Enter your email — we&apos;ll send a secure login link.
+              </p>
+              <p className="text-zinc-600 text-xs mb-8">
+                New user? Account will be created automatically.
               </p>
 
               {errorMsg && (
-                <div className="mb-4 p-3 bg-red-600/10 border border-red-600/30 text-red-400 text-xs rounded">
+                <div className="mb-4 p-3 bg-red-600/10 border border-red-600/30 text-red-400 text-xs">
                   {errorMsg}
                 </div>
               )}
@@ -116,65 +125,71 @@ export default function LoginPage() {
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <>
-                      SEND LOGIN LINK <ArrowRight className="w-4 h-4" />
-                    </>
+                    <>SEND LOGIN LINK <ArrowRight className="w-4 h-4" /></>
                   )}
                 </button>
               </form>
 
               <div className="flex items-center gap-2 mt-6 text-zinc-600 text-xs justify-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-                No password needed — secure magic link login
+                No password needed — 1-click magic link login
               </div>
             </>
           ) : (
-            /* Success State */
+            /* ── Sent State ── */
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-4"
+              className="text-center py-2"
             >
-              <div className="w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+              <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                <MailOpen className="w-8 h-8 text-red-500" />
               </div>
+
               <h2 className="text-lg font-black tracking-widest uppercase text-white mb-2">
                 Check Your Email!
               </h2>
-              <p className="text-zinc-400 text-sm mb-1">
-                We sent a login link to:
+              <p className="text-zinc-400 text-sm mb-1">Login link sent to:</p>
+              <p className="text-red-400 font-black text-sm mb-6 tracking-wide">
+                {email}
               </p>
-              <p className="text-red-400 font-bold text-sm mb-6">{email}</p>
 
-              <div className="bg-zinc-900 border border-zinc-800 p-4 text-left space-y-2 mb-6">
-                <p className="text-xs text-zinc-400 flex items-center gap-2">
-                  <span className="text-red-500 font-bold">1.</span>
-                  Open the email from RADHAJI
-                </p>
-                <p className="text-xs text-zinc-400 flex items-center gap-2">
-                  <span className="text-red-500 font-bold">2.</span>
-                  Click the &quot;Sign in&quot; button
-                </p>
-                <p className="text-xs text-zinc-400 flex items-center gap-2">
-                  <span className="text-red-500 font-bold">3.</span>
-                  You&apos;ll be logged in automatically
-                </p>
+              {/* Steps */}
+              <div className="bg-zinc-900 border border-zinc-800 p-5 text-left space-y-3 mb-6">
+                {[
+                  "Open the email from RADHAJI",
+                  'Click the "Sign in" button in the email',
+                  "You\'ll be logged in automatically ✓",
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="w-5 h-5 bg-red-600 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <p className="text-zinc-400 text-xs leading-relaxed">{step}</p>
+                  </div>
+                ))}
               </div>
 
-              <button
-                onClick={() => { setSent(false); setEmail(""); }}
-                className="w-full border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-xs font-bold tracking-widest uppercase py-3 transition-colors"
-              >
-                Use Different Email
-              </button>
+              <div className="flex items-center gap-2 justify-center text-zinc-600 text-xs mb-5">
+                <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                Link expires in 1 hour · Check spam if not received
+              </div>
 
-              <button
-                onClick={handleSendLink}
-                disabled={loading}
-                className="w-full mt-2 text-zinc-600 hover:text-zinc-400 text-xs tracking-widest uppercase py-2 transition-colors"
-              >
-                {loading ? "Sending..." : "Resend Link"}
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleSendLink}
+                  disabled={loading}
+                  className="w-full border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-xs font-bold tracking-widest uppercase py-3 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Sending..." : "Resend Link"}
+                </button>
+                <button
+                  onClick={() => { setSent(false); setEmail(""); setErrorMsg(""); }}
+                  className="w-full text-zinc-600 hover:text-zinc-400 text-xs tracking-widest uppercase py-2 transition-colors"
+                >
+                  Use Different Email
+                </button>
+              </div>
             </motion.div>
           )}
         </div>
