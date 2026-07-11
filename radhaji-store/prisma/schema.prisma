@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  name         String
+  slug         String      @unique
+  description  String
+  price        Float
+  comparePrice Float?
+  images       String[]
+  category     Category    @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  sizes        String[]
+  colors       Json
+  stock        Int         @default(0)
+  isBestseller Boolean     @default(false)
+  isNewArrival Boolean     @default(false)
+  isFeatured   Boolean     @default(false)
+  tags         String[]
+  orderItems   OrderItem[]
+  reviews      Review[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  address         String
+  city            String
+  state           String
+  pincode         String
+  items           OrderItem[]
+  subtotal        Float
+  shippingCost    Float         @default(0)
+  tax             Float         @default(0)
+  total           Float
+  status          OrderStatus   @default(PENDING)
+  paymentId       String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  razorpayOrderId String?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  name      String
+  image     String
+  price     Float
+  quantity  Int
+  size      String?
+  color     String?
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  authorName String
+  authorCity String?
+  rating     Int
+  comment    String
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
