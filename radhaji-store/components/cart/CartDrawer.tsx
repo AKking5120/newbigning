@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/store/cart";
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -8,8 +9,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
+  const [mounted, setMounted] = useState(false);
   const { items, isOpen, closeCart, removeItem, updateQuantity, getTotalPrice } =
     useCartStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render cart contents until after hydration
+  if (!mounted) return null;
   const total = getTotalPrice();
   const FREE_SHIPPING_THRESHOLD = 2000;
   const remaining = FREE_SHIPPING_THRESHOLD - total;

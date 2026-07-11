@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Search, User, Heart, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, User, Heart, ShoppingBag, Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { motion, AnimatePresence } from "framer-motion";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const navLinks = [
   {
@@ -35,8 +37,29 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menOpen, setMenOpen] = useState(false);
   const [womensOpen, setWomensOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { getTotalItems, openCart } = useCartStore();
-  const totalItems = getTotalItems();
+
+  useEffect(() => {
+    setMounted(true);
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const totalItems = mounted ? getTotalItems() : 0;
+
+  async function handleSignOut() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserMenuOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-black border-b border-zinc-900">
@@ -202,9 +225,71 @@ export function Navbar() {
             <button className="hidden sm:flex text-zinc-400 hover:text-white transition-colors p-1">
               <Search className="w-5 h-5" />
             </button>
-            <button className="hidden sm:flex text-zinc-400 hover:text-white transition-colors p-1">
-              <User className="w-5 h-5" />
-            </button>
+
+            {/* User / Profile */}
+            <div className="relative hidden sm:block">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors p-1"
+                    aria-label="Account menu"
+                  >
+                    <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-[10px] font-black">
+                      {user.email?.[0].toUpperCase()}
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-52 bg-zinc-900 border border-zinc-800 shadow-2xl py-2 z-50"
+                        onMouseLeave={() => setUserMenuOpen(false)}
+                      >
+                        <div className="px-4 py-2 border-b border-zinc-800 mb-1">
+                          <p className="text-[10px] text-zinc-500 tracking-widest uppercase">Logged in as</p>
+                          <p className="text-white text-xs font-semibold truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          href="/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-bold tracking-widest text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors uppercase"
+                        >
+                          <User className="w-3.5 h-3.5" /> My Profile
+                        </Link>
+                        <Link
+                          href="/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-bold tracking-widest text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors uppercase"
+                        >
+                          <ShoppingBag className="w-3.5 h-3.5" /> My Orders
+                        </Link>
+                        <div className="border-t border-zinc-800 mt-1 pt-1">
+                          <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-xs font-bold tracking-widest text-red-500 hover:bg-zinc-800 transition-colors uppercase"
+                          >
+                            <LogOut className="w-3.5 h-3.5" /> Logout
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors p-1"
+                  aria-label="Login"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+              )}
+            </div>
+
             <button className="hidden sm:flex text-zinc-400 hover:text-white transition-colors p-1 relative">
               <Heart className="w-5 h-5" />
             </button>
