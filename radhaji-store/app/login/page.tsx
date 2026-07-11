@@ -1,50 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { sendOTP, verifyOTP } from "@/lib/auth";
+import { Mail, ArrowRight, Loader2, ShieldCheck, CheckCircle } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  async function handleSendOTP(e: React.FormEvent) {
+  async function handleSendLink(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email.trim()) return;
+    setErrorMsg("");
     setLoading(true);
-    const { error } = await sendOTP(email);
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("OTP sent to your email!");
-    setStep("otp");
-  }
 
-  async function handleVerifyOTP(e: React.FormEvent) {
-    e.preventDefault();
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter the 6-digit OTP");
-      return;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+        toast.error(error.message);
+        return;
+      }
+
+      setSent(true);
+      toast.success("Magic link sent! Check your email.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      setErrorMsg(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-    setLoading(true);
-    const { error } = await verifyOTP(email, otp);
-    setLoading(false);
-    if (error) {
-      toast.error("Invalid or expired OTP. Try again.");
-      return;
-    }
-    toast.success("Login successful!");
-    router.push("/profile");
-    router.refresh();
   }
 
   return (
@@ -62,23 +61,35 @@ export default function LoginPage() {
               X
             </div>
             <div className="text-left">
-              <div className="font-black text-white text-2xl tracking-[0.2em] leading-none">RADHAJI</div>
-              <div className="text-[9px] text-zinc-500 tracking-[0.3em]">PREMIUM ACTIVEWEAR</div>
+              <div className="font-black text-white text-2xl tracking-[0.2em] leading-none">
+                RADHAJI
+              </div>
+              <div className="text-[9px] text-zinc-500 tracking-[0.3em]">
+                PREMIUM ACTIVEWEAR
+              </div>
             </div>
           </Link>
         </div>
 
         <div className="bg-zinc-950 border border-zinc-800 p-8">
-          {step === "email" ? (
+          {!sent ? (
             <>
               <h1 className="text-xl font-black tracking-widest uppercase text-white mb-1">
                 Login / Register
               </h1>
               <p className="text-zinc-500 text-sm mb-8">
-                Enter your email — we'll send a one-time password.
+                Enter your email — we&apos;ll send you a secure login link.
+                <br />
+                <span className="text-zinc-600 text-xs">New user? Account will be created automatically.</span>
               </p>
 
-              <form onSubmit={handleSendOTP} className="space-y-4">
+              {errorMsg && (
+                <div className="mb-4 p-3 bg-red-600/10 border border-red-600/30 text-red-400 text-xs rounded">
+                  {errorMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleSendLink} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold tracking-widest uppercase text-zinc-500 mb-2">
                     Email Address
@@ -99,79 +110,72 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
-                  disabled={loading || !email}
-                  className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm tracking-widest uppercase py-3.5 transition-colors"
+                  disabled={loading || !email.trim()}
+                  className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm tracking-widest uppercase py-4 transition-colors"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <>SEND OTP <ArrowRight className="w-4 h-4" /></>
+                    <>
+                      SEND LOGIN LINK <ArrowRight className="w-4 h-4" />
+                    </>
                   )}
                 </button>
               </form>
 
               <div className="flex items-center gap-2 mt-6 text-zinc-600 text-xs justify-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-                No password needed — secure OTP login
+                No password needed — secure magic link login
               </div>
             </>
           ) : (
-            <>
+            /* Success State */
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-4"
+            >
+              <div className="w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+              <h2 className="text-lg font-black tracking-widest uppercase text-white mb-2">
+                Check Your Email!
+              </h2>
+              <p className="text-zinc-400 text-sm mb-1">
+                We sent a login link to:
+              </p>
+              <p className="text-red-400 font-bold text-sm mb-6">{email}</p>
+
+              <div className="bg-zinc-900 border border-zinc-800 p-4 text-left space-y-2 mb-6">
+                <p className="text-xs text-zinc-400 flex items-center gap-2">
+                  <span className="text-red-500 font-bold">1.</span>
+                  Open the email from RADHAJI
+                </p>
+                <p className="text-xs text-zinc-400 flex items-center gap-2">
+                  <span className="text-red-500 font-bold">2.</span>
+                  Click the &quot;Sign in&quot; button
+                </p>
+                <p className="text-xs text-zinc-400 flex items-center gap-2">
+                  <span className="text-red-500 font-bold">3.</span>
+                  You&apos;ll be logged in automatically
+                </p>
+              </div>
+
               <button
-                onClick={() => { setStep("email"); setOtp(""); }}
-                className="text-xs text-zinc-500 hover:text-white tracking-widest uppercase flex items-center gap-1 mb-6 transition-colors"
+                onClick={() => { setSent(false); setEmail(""); }}
+                className="w-full border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-xs font-bold tracking-widest uppercase py-3 transition-colors"
               >
-                ← Change Email
+                Use Different Email
               </button>
 
-              <h1 className="text-xl font-black tracking-widest uppercase text-white mb-1">
-                Enter OTP
-              </h1>
-              <p className="text-zinc-500 text-sm mb-2">
-                We sent a 6-digit code to
-              </p>
-              <p className="text-red-400 font-bold text-sm mb-8">{email}</p>
-
-              <form onSubmit={handleVerifyOTP} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-bold tracking-widest uppercase text-zinc-500 mb-2">
-                    6-Digit OTP
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    required
-                    autoFocus
-                    placeholder="123456"
-                    className="w-full bg-zinc-900 border border-zinc-700 text-white text-2xl font-black tracking-[0.5em] text-center px-4 py-4 focus:outline-none focus:border-red-500 placeholder:text-zinc-700 placeholder:tracking-normal"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading || otp.length !== 6}
-                  className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm tracking-widest uppercase py-3.5 transition-colors"
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>VERIFY & LOGIN <ArrowRight className="w-4 h-4" /></>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSendOTP}
-                  disabled={loading}
-                  className="w-full text-zinc-500 hover:text-white text-xs tracking-widest uppercase py-2 transition-colors"
-                >
-                  Resend OTP
-                </button>
-              </form>
-            </>
+              <button
+                onClick={handleSendLink}
+                disabled={loading}
+                className="w-full mt-2 text-zinc-600 hover:text-zinc-400 text-xs tracking-widest uppercase py-2 transition-colors"
+              >
+                {loading ? "Sending..." : "Resend Link"}
+              </button>
+            </motion.div>
           )}
         </div>
       </motion.div>

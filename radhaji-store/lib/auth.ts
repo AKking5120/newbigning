@@ -7,8 +7,8 @@ export async function sendOTP(email: string) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: true, // auto-register if new user
-      emailRedirectTo: undefined,
+      shouldCreateUser: true,
+      // No emailRedirectTo = forces OTP code mode (no magic link)
     },
   });
   return { error };
@@ -31,6 +31,8 @@ export async function signOut() {
 
 export async function getUser() {
   const supabase = createSupabaseBrowserClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return user;
 }
