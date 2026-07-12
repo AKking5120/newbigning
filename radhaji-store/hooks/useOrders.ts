@@ -16,7 +16,9 @@ async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   return res.json();
 }
 
-async function createRazorpayOrder(amount: number): Promise<{ id: string; amount: number; currency: string }> {
+async function createRazorpayOrder(
+  amount: number
+): Promise<{ id: string; amount: number; currency: string }> {
   const res = await fetch("/api/payment/create-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,13 +29,9 @@ async function createRazorpayOrder(amount: number): Promise<{ id: string; amount
 }
 
 export function useCreateOrder() {
-  return useMutation({
-    mutationFn: createOrder,
-  });
+  return useMutation({ mutationFn: createOrder });
 }
 
 export function useCreateRazorpayOrder() {
-  return useMutation({
-    mutationFn: (amount: number) => createRazorpayOrder(amount),
-  });
+  return useMutation({ mutationFn: (amount: number) => createRazorpayOrder(amount) });
 }

@@ -30,6 +30,8 @@ model Product {
   sizes        String[]
   colors       Json
   stock        Int         @default(0)
+  views        Int         @default(0)
+  clicks       Int         @default(0)
   isBestseller Boolean     @default(false)
   isNewArrival Boolean     @default(false)
   isFeatured   Boolean     @default(false)
@@ -41,18 +43,18 @@ model Product {
 }
 
 model UserProfile {
-  id          String   @id // matches Supabase auth user id
-  email       String   @unique
-  fullName    String?
-  phone       String?
-  avatarUrl   String?
-  address     String?
-  city        String?
-  state       String?
-  pincode     String?
-  orders      Order[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id
+  email     String   @unique
+  fullName  String?
+  phone     String?
+  avatarUrl String?
+  address   String?
+  city      String?
+  state     String?
+  pincode   String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
