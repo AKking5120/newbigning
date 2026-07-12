@@ -7,12 +7,14 @@ import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 
 const pageTitles: Record<string, string> = {
-  "/admin": "Dashboard",
+  "/admin": "Home",
   "/admin/orders": "Orders",
+  "/admin/inventory": "Inventory",
   "/admin/products": "Products",
   "/admin/products/new": "Add Product",
   "/admin/users": "Users",
-  "/admin/categories": "Categories",
+  "/admin/categories": "Category",
+  "/admin/business": "Business Dashboard",
 };
 
 export function AdminTopbar() {

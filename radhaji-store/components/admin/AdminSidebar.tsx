@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, ShoppingBag, Package,
-  Users, Tag, LogOut, ExternalLink, Menu, X,
+  Home, ShoppingBag, Package,
+  Tag, BarChart3, LogOut, ExternalLink, Menu, X,
 } from "lucide-react";
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Home", href: "/admin", icon: Home },
   { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
-  { label: "Products", href: "/admin/products", icon: Package },
-  { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Categories", href: "/admin/categories", icon: Tag },
+  { label: "Inventory", href: "/admin/inventory", icon: Package },
+  { label: "Category", href: "/admin/categories", icon: Tag },
+  { label: "Business Dashboard", href: "/admin/business", icon: BarChart3 },
 ];
 
 function SidebarInner({ onClose }: { onClose?: () => void }) {
@@ -33,7 +33,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
       <div className="h-16 flex items-center px-5 border-b border-gray-200 flex-shrink-0">
         <Link href="/admin" onClick={onClose} className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-red-600 flex items-center justify-center font-black text-white text-sm rounded">
-            R
+            W
           </div>
           <div>
             <p className="font-black text-gray-900 text-sm tracking-wider leading-none">WALKUS</p>
@@ -62,11 +62,12 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
-              <item.icon className={`w-4.5 h-4.5 flex-shrink-0 ${active ? "text-red-600" : "text-gray-400"}`} style={{ width: 18, height: 18 }} />
+              <item.icon
+                className={`flex-shrink-0 ${active ? "text-red-600" : "text-gray-400"}`}
+                style={{ width: 18, height: 18 }}
+              />
               {item.label}
-              {active && (
-                <div className="ml-auto w-1.5 h-1.5 bg-red-600 rounded-full" />
-              )}
+              {active && <div className="ml-auto w-1.5 h-1.5 bg-red-600 rounded-full" />}
             </Link>
           );
         })}
@@ -99,12 +100,10 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop */}
       <aside className="hidden lg:block w-60 flex-shrink-0 h-screen sticky top-0">
         <SidebarInner />
       </aside>
 
-      {/* Mobile toggle button */}
       <button
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 bg-white border border-gray-200 shadow p-2 rounded-lg text-gray-700"
@@ -112,21 +111,13 @@ export function AdminSidebar() {
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <aside className="w-60 h-full shadow-xl">
             <SidebarInner onClose={() => setMobileOpen(false)} />
           </aside>
-          <button
-            className="flex-1 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-            aria-label="Close menu"
-          />
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="absolute top-4 left-64 bg-white rounded-full p-1 shadow"
-          >
+          <button className="flex-1 bg-black/40" onClick={() => setMobileOpen(false)} aria-label="Close menu" />
+          <button onClick={() => setMobileOpen(false)} className="absolute top-4 left-64 bg-white rounded-full p-1 shadow">
             <X className="w-4 h-4 text-gray-600" />
           </button>
         </div>
