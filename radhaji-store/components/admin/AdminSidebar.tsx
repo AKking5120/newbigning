@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, ShoppingBag, Package, Users,
-  Tag, LogOut, ChevronRight, Menu, X,
+  LayoutDashboard, ShoppingBag, Package,
+  Users, Tag, LogOut, ExternalLink, Menu, X,
 } from "lucide-react";
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -18,10 +17,9 @@ const navItems = [
   { label: "Categories", href: "/admin/categories", icon: Tag },
 ];
 
-export function AdminSidebar() {
+function SidebarInner({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
     const supabase = createSupabaseBrowserClient();
@@ -29,87 +27,108 @@ export function AdminSidebar() {
     router.push("/login");
   }
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+  return (
+    <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* Logo */}
-      <div className="p-6 border-b border-zinc-800">
-        <Link href="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-red-600 flex items-center justify-center font-black text-white text-sm">X</div>
+      <div className="h-16 flex items-center px-5 border-b border-gray-200 flex-shrink-0">
+        <Link href="/admin" onClick={onClose} className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-red-600 flex items-center justify-center font-black text-white text-sm rounded">
+            R
+          </div>
           <div>
-            <p className="font-black text-white text-sm tracking-widest">RADHAJI</p>
-            <p className="text-[9px] text-zinc-500 tracking-widest">ADMIN PANEL</p>
+            <p className="font-black text-gray-900 text-sm tracking-wider leading-none">RADHAJI</p>
+            <p className="text-[9px] text-gray-400 tracking-widest leading-none mt-0.5">ADMIN PANEL</p>
           </div>
         </Link>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <p className="text-[10px] font-semibold text-gray-400 tracking-widest uppercase px-3 mb-2">
+          MAIN MENU
+        </p>
         {navItems.map((item) => {
-          const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          const active =
+            pathname === item.href ||
+            (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center justify-between px-4 py-3 text-xs font-bold tracking-widest uppercase transition-all group ${
+              onClick={onClose}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 active
-                  ? "bg-red-600 text-white"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-red-50 text-red-600 font-semibold"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </div>
-              <ChevronRight className={`w-3 h-3 transition-transform ${active ? "translate-x-0.5" : "opacity-0 group-hover:opacity-100"}`} />
+              <item.icon className={`w-4.5 h-4.5 flex-shrink-0 ${active ? "text-red-600" : "text-gray-400"}`} style={{ width: 18, height: 18 }} />
+              {item.label}
+              {active && (
+                <div className="ml-auto w-1.5 h-1.5 bg-red-600 rounded-full" />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* View Store + Logout */}
-      <div className="p-4 border-t border-zinc-800 space-y-2">
+      {/* Bottom */}
+      <div className="px-3 py-4 border-t border-gray-200 space-y-0.5">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-3 px-4 py-3 text-xs font-bold tracking-widest uppercase text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
         >
-          <Package className="w-4 h-4" /> View Store
+          <ExternalLink className="text-gray-400 flex-shrink-0" style={{ width: 18, height: 18 }} />
+          View Store
         </Link>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 text-xs font-bold tracking-widest uppercase text-red-500 hover:bg-zinc-800 transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
         >
-          <LogOut className="w-4 h-4" /> Logout
+          <LogOut className="text-red-500 flex-shrink-0" style={{ width: 18, height: 18 }} />
+          Logout
         </button>
       </div>
     </div>
   );
+}
+
+export function AdminSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-56 flex-col bg-zinc-900 border-r border-zinc-800 h-screen sticky top-0">
-        <SidebarContent />
+      {/* Desktop */}
+      <aside className="hidden lg:block w-60 flex-shrink-0 h-screen sticky top-0">
+        <SidebarInner />
       </aside>
 
-      {/* Mobile Toggle */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="bg-zinc-900 border border-zinc-700 p-2 text-white"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
+      {/* Mobile toggle button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 bg-white border border-gray-200 shadow p-2 rounded-lg text-gray-700"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
-          <aside className="w-56 bg-zinc-900 border-r border-zinc-800 h-full">
-            <SidebarContent />
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <aside className="w-60 h-full shadow-xl">
+            <SidebarInner onClose={() => setMobileOpen(false)} />
           </aside>
-          <div className="flex-1 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <button
+            className="flex-1 bg-black/40"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          />
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="absolute top-4 left-64 bg-white rounded-full p-1 shadow"
+          >
+            <X className="w-4 h-4 text-gray-600" />
+          </button>
         </div>
       )}
     </>
