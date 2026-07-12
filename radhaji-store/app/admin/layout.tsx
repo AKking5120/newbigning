@@ -3,7 +3,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 
 export const metadata: Metadata = {
-  title: "RADHAJI Admin",
+  title: "WALKUS Admin",
   robots: { index: false, follow: false },
 };
 

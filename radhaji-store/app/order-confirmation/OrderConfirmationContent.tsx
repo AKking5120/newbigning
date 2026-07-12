@@ -32,7 +32,7 @@ export function OrderConfirmationContent() {
           ORDER CONFIRMED!
         </h1>
         <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-          Thank you for choosing RADHAJI. Your gear is on the way.
+          Thank you for choosing WALKUS. Your gear is on the way.
         </p>
 
         {/* Demo notice */}

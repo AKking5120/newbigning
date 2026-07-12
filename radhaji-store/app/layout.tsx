@@ -8,12 +8,12 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "RADHAJI — Premium Activewear",
+  title: "WALKUS — Premium Activewear",
   description:
     "Advanced fabrics. Bold design. Unmatched performance. For those who rise above.",
-  keywords: ["activewear", "gym wear", "sports clothing", "fitness", "radhaji"],
+  keywords: ["activewear", "gym wear", "sports clothing", "fitness", "walkus"],
   openGraph: {
-    title: "RADHAJI — Premium Activewear",
+    title: "WALKUS — Premium Activewear",
     description: "Engineered for every summit. Shop premium activewear.",
     type: "website",
   },

@@ -36,7 +36,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
             R
           </div>
           <div>
-            <p className="font-black text-gray-900 text-sm tracking-wider leading-none">RADHAJI</p>
+            <p className="font-black text-gray-900 text-sm tracking-wider leading-none">WALKUS</p>
             <p className="text-[9px] text-gray-400 tracking-widest leading-none mt-0.5">ADMIN PANEL</p>
           </div>
         </Link>

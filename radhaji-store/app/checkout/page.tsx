@@ -97,7 +97,7 @@ export default function CheckoutPage() {
         key: razorpayKeyId,
         amount: rpOrder.amount,
         currency: rpOrder.currency,
-        name: "RADHAJI",
+        name: "WALKUS",
         description: "Premium Activewear",
         order_id: rpOrder.id,
         prefill: {

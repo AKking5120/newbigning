@@ -72,7 +72,7 @@ export function Navbar() {
             </div>
             <div>
               <div className="font-black text-white text-xl tracking-[0.2em] leading-none">
-                RADHAJI
+                WALKUS
               </div>
               <div className="text-[9px] text-zinc-500 tracking-[0.3em] leading-none font-medium">
                 PREMIUM ACTIVEWEAR
