@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,900&family=Barlow+Condensed:wght@400;500;600;700;800;900&display=swap');
+
+@import "tailwindcss";
+
+/* ── Luxury Color Palette ─────────────────────────────────────
+   Crimson Depth  : #710014
+   Warm Sand      : #B38F6F
+   Soft Pearl     : #F2F1ED
+   Obsidian Black : #161616
+──────────────────────────────────────────────────────────────*/
+:root {
+  --crimson:     #710014;
+  --crimson-mid: #8a0018;
+  --crimson-dark:#4d000e;
+  --sand:        #B38F6F;
+  --sand-light:  #c9a98a;
+  --pearl:       #F2F1ED;
+  --pearl-dark:  #e8e6e1;
+  --obsidian:    #161616;
+  --obsidian-mid:#1f1f1f;
+  --obsidian-light:#2a2a2a;
+
+  --background:  var(--obsidian);
+  --foreground:  var(--pearl);
+}
+
+@theme inline {
+  --color-crimson:      #710014;
+  --color-crimson-mid:  #8a0018;
+  --color-crimson-dark: #4d000e;
+  --color-sand:         #B38F6F;
+  --color-sand-light:   #c9a98a;
+  --color-pearl:        #F2F1ED;
+  --color-pearl-dark:   #e8e6e1;
+  --color-obsidian:     #161616;
+  --color-obsidian-mid: #1f1f1f;
+  --font-sans:          'Barlow', system-ui, sans-serif;
+  --font-condensed:     'Barlow Condensed', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--obsidian);
+  color: var(--pearl);
+  font-family: 'Barlow', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────*/
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: var(--obsidian); }
+::-webkit-scrollbar-thumb  { background: var(--obsidian-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--crimson); }
+
+/* ── Announcement bar ticker ────────────────────────────────*/
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-wrap    { overflow: hidden; white-space: nowrap; }
+.ticker-content { display: inline-flex; animation: ticker 30s linear infinite; }
+
+/* ── Selection ──────────────────────────────────────────────*/
+::selection { background: var(--crimson); color: var(--pearl); }
+
+/* ── Admin panel overrides ──────────────────────────────────*/
+.admin-bg     { background: var(--pearl); }
+.admin-card   { background: #ffffff; border-color: #e5e1da; }
+.admin-text   { color: #1a1a1a; }
+.admin-muted  { color: #7a7269; }
+.admin-accent { color: var(--crimson); }

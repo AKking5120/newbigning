@@ -1,0 +1,33 @@
+# Radhaji Store - Search Engine Crawler Directives
+
+# Allow all bots to crawl the site
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /.next
+Disallow: /node_modules
+Disallow: /*.json$
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Allow: /product/
+Allow: /store
+
+# Specific directives for Googlebot
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Specific directives for Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block AI crawlers (optional - uncomment if needed)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: CCBot
+# Disallow: /
+
+# Sitemap location
+Sitemap: https://walkus.com/sitemap.xml
